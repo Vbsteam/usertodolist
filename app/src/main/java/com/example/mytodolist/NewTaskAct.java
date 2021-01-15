@@ -1,0 +1,137 @@
+package com.example.mytodolist;
+
+import android.content.Intent;
+import android.graphics.Typeface;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Random;
+
+public class NewTaskAct extends AppCompatActivity {
+
+    TextView titlepage, addtitle, adddesc, adddate;
+    EditText titledoes, descdoes, datedoes;
+    Button btnSaveTask, btnCancel;
+    DatabaseReference reference;
+    Integer doesNum = new Random().nextInt();
+    String keydoes = Integer.toString(doesNum);
+    FirebaseUser user;
+    String id;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_new_task);
+
+        titlepage = findViewById(R.id.titlepage);
+
+        addtitle = findViewById(R.id.addtitle);
+        adddesc = findViewById(R.id.adddesc);
+        adddate = findViewById(R.id.adddate);
+
+        titledoes = findViewById(R.id.titledoes);
+        descdoes = findViewById(R.id.descdoes);
+        datedoes = findViewById(R.id.datedoes);
+
+        btnSaveTask = findViewById(R.id.btnSaveTask);
+        btnCancel = findViewById(R.id.btnCancel);
+
+
+        btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(NewTaskAct.this,MainActivity.class);
+                startActivity(intent);
+            }
+        });
+
+
+
+
+
+
+
+
+
+        btnSaveTask.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // insert data to database
+
+                //store data at specific user id
+
+
+                user = FirebaseAuth.getInstance().getCurrentUser();
+                id= user.getUid();
+
+
+
+
+
+                //id as root node
+                reference = FirebaseDatabase.getInstance().getReference().child(id).
+                        child("Does" + doesNum);
+
+
+                //for offline database show
+                reference.keepSynced(true);
+
+
+
+
+                reference.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+
+                        dataSnapshot.getRef().child("titledoes").setValue(titledoes.getText().toString());
+                        dataSnapshot.getRef().child("descdoes").setValue(descdoes.getText().toString());
+                        dataSnapshot.getRef().child("datedoes").setValue(datedoes.getText().toString());
+                        dataSnapshot.getRef().child("keydoes").setValue(keydoes);
+
+                        Intent a = new Intent(NewTaskAct.this,MainActivity.class);
+                        startActivity(a);
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+            }
+        });
+
+        // import font
+        Typeface MLight = Typeface.createFromAsset(getAssets(), "fonts/ML.ttf");
+        Typeface MMedium = Typeface.createFromAsset(getAssets(), "fonts/MM.ttf");
+
+        // customize font
+        titlepage.setTypeface(MMedium);
+
+        addtitle.setTypeface(MLight);
+        titledoes.setTypeface(MMedium);
+
+        adddesc.setTypeface(MLight);
+        descdoes.setTypeface(MMedium);
+
+        adddate.setTypeface(MLight);
+        datedoes.setTypeface(MMedium);
+
+        btnSaveTask.setTypeface(MMedium);
+        btnCancel.setTypeface(MLight);
+
+    }
+}
